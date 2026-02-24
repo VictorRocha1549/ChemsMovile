@@ -19,7 +19,8 @@ package mx.itson.cheems
     class MainActivity : AppCompatActivity(), View.OnClickListener {
 
         var gameOverCard = 0
-        var aciertos = 0 // Aquí guardaremos cuántas cartas buenas llevas
+        var aciertos = 0 // Aquí guardaremos cuántas cartas buenas
+        var cheems_master = 0
 
         override fun onCreate(savedInstanceState: Bundle?) {
             super.onCreate(savedInstanceState)
@@ -39,40 +40,55 @@ package mx.itson.cheems
                 start()
             }
 
+        fun vibrator(){
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.S){
+                val vibratorAdmin = applicationContext.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
+                val vibrator = vibratorAdmin.defaultVibrator
+                vibrator.vibrate(VibrationEffect.createOneShot(1500, VibrationEffect.DEFAULT_AMPLITUDE))
+                Log.d("VIBRACION", "Vibrando con VibratorManager (Android 12+)")
+            } else {
+                val vibrator = applicationContext.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+                vibrator.vibrate(1500)
+                Log.d("VIBRACION", "Vibrando con Vibrator clásico (Android 11 o menor)")
+            }
+
+        }
+
             fun start() {
                 aciertos = 0
 
-                for (i in 1..9) {
+                for (i in 1..12) {
                     val resID = resources.getIdentifier("card$i", "id", packageName)
                     val btnCard = findViewById<ImageButton>(resID)
                     btnCard.setOnClickListener(this)
                     btnCard.setBackgroundResource(R.drawable.cheems_question)
-                    // Habilitamos el botón de nuevo (porque los deshabilitamos al jugar)
+                    // Habilitamos el botón de nuevo (por que los deshabilitamos al jugar)
                     btnCard.isEnabled = true
                 }
 
-                gameOverCard = (1..9).random()
+                gameOverCard = (1..12).random()
                 Log.d("El valor de la carta", "La carta perdedora es $gameOverCard")
+                makeText(this, R.string.welcome, Toast.LENGTH_LONG).show()
+                //definimos la posición de la carta cheems master y sea diferente a la perdedora
+
+
+                do {
+                    cheems_master = (1..12).random()
+                } while (cheems_master == gameOverCard)
+                Log.d("El valor de la carta", "La carta cheems master es $cheems_master")
+
+
+
             }
 
             fun fli(cart: Int) {
                 // checamos si la carta que tocaste es la perdedora
                 if (cart == gameOverCard) {
-
-                    if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.S){
-                        val vibratorAdmin = applicationContext.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
-                        val vibrator = vibratorAdmin.defaultVibrator
-                        vibrator.vibrate(VibrationEffect.createOneShot(1500, VibrationEffect.DEFAULT_AMPLITUDE))
-                        Log.d("VIBRACION", "Vibrando con VibratorManager (Android 12+)") // <-- Agrega esto
-                    } else {
-                        val vibrator = applicationContext.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
-                        vibrator.vibrate(1500)
-                        Log.d("VIBRACION", "Vibrando con Vibrator clásico (Android 11 o menor)") // <-- Agrega esto
-                    }
-                                makeText(this, "Perdiste", Toast.LENGTH_LONG).show()
+                    makeText(this, R.string.lose, Toast.LENGTH_LONG).show()
+                    vibrator()
 
                     // Ciclo para destapar todas las cartas si pierdes
-                    for (i in 1..9) {
+                    for (i in 1..12) {
                         val btn = findViewById<ImageButton>(
                             resources.getIdentifier("card$i", "id", this.packageName)
                         )
@@ -80,15 +96,41 @@ package mx.itson.cheems
                             btn.setBackgroundResource(R.drawable.cheems_bad)
                         } else {
                             btn.setBackgroundResource(R.drawable.cheems_ok)
+                            val idMaster = resources.getIdentifier("card$cheems_master", "id", packageName)
+                            val btnMaster = findViewById<ImageButton>(idMaster)
+                            btnMaster.setBackgroundResource(R.drawable.cheems_master)
                         }
                         // Se bloquean todas las cartas para que no se siga jugando
                         btn.isEnabled = false
                     }
 
+                }else if(cart == cheems_master){
+                        makeText(this,R.string.cheems_master, Toast.LENGTH_LONG).show()
+                        vibrator()
+
+                    // Ciclo para destapar todas las cartas si ganas por cheems master
+                    for (i in 1..12) {
+                        val btn = findViewById<ImageButton>(
+                            resources.getIdentifier("card$i", "id", this.packageName)
+                        )
+                        if (i == cart) {
+                            btn.setBackgroundResource(R.drawable.cheems_master)
+                        } else {
+                            val idBad = resources.getIdentifier("card$gameOverCard", "id", packageName)
+                            val btnBad = findViewById<ImageButton>(idBad)
+                            btnBad.setBackgroundResource(R.drawable.cheems_bad)
+                            btn.setBackgroundResource(R.drawable.cheems_ok)
+                        }
+                        // Se bloquean todas las cartas para que no se siga jugando
+                        btn.isEnabled = false
+                    }
+
+
                 } else {
                     // Si NO es la perdedora (es un acierto)
                     val btnCard = findViewById<ImageButton>(
                         resources.getIdentifier("card$cart", "id", packageName)
+
                     )
 
                     btnCard.setBackgroundResource(R.drawable.cheems_ok)
@@ -96,9 +138,10 @@ package mx.itson.cheems
 
                     aciertos++ // Sumamos al contador
 
-                    // Verificamos si ya ganaste (8 aciertos)
-                    if (aciertos == 8) {
-                        makeText(this, "¡Ganaste! Has esquivado a Cheems", Toast.LENGTH_LONG).show()
+                    // Verificamos si ya ganaste (11 aciertos)
+                    if (aciertos == 11) {
+                        makeText(this, R.string.win, Toast.LENGTH_LONG).show()
+                        vibrator()
 
                         // Destapamos la carta mala que sobró
                         val idBad = resources.getIdentifier("card$gameOverCard", "id", packageName)
@@ -122,6 +165,9 @@ package mx.itson.cheems
                     R.id.card7 -> fli(7)
                     R.id.card8 -> fli(8)
                     R.id.card9 -> fli(9)
+                    R.id.card10 -> fli(10)
+                    R.id.card11 -> fli(11)
+                    R.id.card12 -> fli(12)
                 }
             }
         }

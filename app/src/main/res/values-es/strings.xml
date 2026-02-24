@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Cheems</string>
+    <string name="btn_reiniciar">repetir juego</string>
+    <string name="welcome">Bienvenido al Juego de Cheems</string>
+    <string name="lose">Perdiste</string>
+    <string name="win">¡Ganaste! Has esquivado a Cheems</string>
+    <string name="cheems_master">¡Ganaste! Has encontrado al Cheems Master</string>
+</resources>

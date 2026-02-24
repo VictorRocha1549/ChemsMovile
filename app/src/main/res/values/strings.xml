@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">Cheems</string>
+    <string name="btn_reiniciar">repeat game</string>
+    <string name="welcome">Welcome to the Cheems Game</string>
+    <string name="lose">Lose</string>
+    <string name="win">You won! You dodged Cheems!</string>
+    <string name="cheems_master">You won! You\'ve found the Cheems master</string>
+
+
 </resources>
